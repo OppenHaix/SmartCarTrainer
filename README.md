@@ -63,10 +63,14 @@
 
 ## ✉️ 致谢与联系方式
 
+原版OItrainer
 - 作者：**seve42**  
 - Luogu：`seve_`  
 - 邮箱：`dreamer-seve@outlook.com` 或 `dreamersseve@gmail.com`
 
+- 魔改版SmartCarTrainer
+- 作者：**奥本海星**
+- 邮箱：`zyscr@outlook.com`
 ---
 
 ##  为什么不提供自定义学生姓名？
