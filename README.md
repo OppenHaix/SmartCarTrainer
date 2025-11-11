@@ -68,7 +68,7 @@
 - Luogu：`seve_`  
 - 邮箱：`dreamer-seve@outlook.com` 或 `dreamersseve@gmail.com`
 
-- 魔改版SmartCarTrainer
+魔改版SmartCarTrainer
 - 作者：**奥本海星**
 - 邮箱：`zyscr@outlook.com`
 ---
