@@ -4,7 +4,7 @@
 */
 
 /**
- * 调试函数：生成超强学生并跳转到第二年NOI
+ * 调试函数：生成超强队员并跳转到第二年全国总决赛
  * 使用方法：在浏览器控制台中输入 debugzak() 即可
  */
 function debugzak() {
@@ -14,7 +14,7 @@ function debugzak() {
     return;
   }
   
-  console.log('🔧 [调试] 开始生成超强学生并跳转到NOI...');
+  console.log('🔧 [调试] 开始生成超强队员并跳转到全国总决赛...');
   
   game.students = [];
   
@@ -35,7 +35,7 @@ function debugzak() {
   game.budget = 1000000;
   console.log('✅ [调试] 已设置经费：¥1,000,000');
   
-  const secondYearNOI = competitions.find(c => c.name === 'NOI' && c.week > WEEKS_PER_HALF);
+  const secondYearNOI = competitions.find(c => c.name === '全国总决赛' && c.week > WEEKS_PER_HALF);
   const targetWeek = secondYearNOI ? secondYearNOI.week - 1 : 27;
   
   if(game.week < targetWeek) {

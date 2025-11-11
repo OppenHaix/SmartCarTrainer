@@ -77,7 +77,7 @@ function createMockGame() {
 
 // 模拟比赛数据
 const mockCompetitions = [
-  { name: 'CSP-S1', week: 15, numProblems: 4, maxScore: 400 }
+  { name: '校内选拔赛', week: 15, numProblems: 4, maxScore: 400 }
 ];
 
 // 测试函数：模拟比赛周触发选择事件后点击按钮

@@ -70,8 +70,8 @@ footer{margin-top:16px;text-align:center;color:var(--muted)}
 .diff-popular-low{background:#fff7f0;color:#d97706;border:1px solid rgba(217,119,6,0.12)} /* 普及-：橙色字体 */
 .diff-popular-high{background:#fffbe6;color:#b77900;border:1px solid rgba(183,121,0,0.12)} /* 普及+提高：黄色字体 */
 .diff-advanced-low{background:#f0f8ff;color:#2563eb;border:1px solid rgba(37,99,235,0.12)} /* 提高+省选-：蓝色字体 */
-.diff-provincial{background:#faf5ff;color:#6b21a8;border:1px solid rgba(107,33,168,0.12)} /* 省选 / NOI-：紫色字体 */
-.diff-noi{background:#f5f5f5;color:#0f172a;border:1px solid rgba(15,23,42,0.06)} /* NOI/NOI+/CTSC：黑色字体 */
+.diff-provincial{background:#faf5ff;color:#6b21a8;border:1px solid rgba(107,33,168,0.12)} /* 分赛区决赛：紫色字体 */
+.diff-noi{background:#f5f5f5;color:#0f172a;border:1px solid rgba(15,23,42,0.06)} /* 全国总决赛/国际赛：黑色字体 */
 
 /* 新增：七色难度语义类（红/橙/黄/绿/蓝/紫/黑） */
 .diff-red{background: #fff0f0; color: #c53030; border: 1px solid rgba(197,48,48,0.12)}

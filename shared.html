@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>分享结果查看 — OI 教练模拟器</title>
+  <title>分享结果查看 — 智能车教练模拟器</title>
   <link rel="stylesheet" href="styles.css">
   <style>
     .shared-banner {
@@ -223,16 +223,16 @@
           studentsHtml += `<div class="student-box" style="margin-bottom:8px;padding:8px;background:white;border-radius:6px;border:1px solid #eee">
             <div style="display:flex;justify-content:space-between;align-items:center">
               <div><strong>${s.name}</strong> ${isActive ? '' : '<span class="warn">[退队]</span>'} <span class="label-pill ${pressureClass}" style="margin-left:8px">压力:${pressureLevel}</span></div>
-              <div style="font-size:12px;color:#666">心理:${mentalRounded}</div>
+              <div style="font-size:12px;color:#666">赛场心态:${mentalRounded}</div>
             </div>
             <div class="compact small" style="margin-top:6px">
-              能力: 思维:${thinkGrade} 编码:${codeGrade}
-              <div style="margin-top:6px">知识: <span class="knowledge-badges">
-                <span class="kb" title="数据结构: ${Math.floor(Number(s.knowledge_ds || 0))}">数据结构${k_ds}</span>
-                <span class="kb" title="图论: ${Math.floor(Number(s.knowledge_graph || 0))}">图论${k_graph}</span>
-                <span class="kb" title="字符串: ${Math.floor(Number(s.knowledge_string || 0))}">字符串${k_str}</span>
-                <span class="kb" title="数学: ${Math.floor(Number(s.knowledge_math || 0))}">数学${k_math}</span>
-                <span class="kb" title="动态规划: ${Math.floor(Number(s.knowledge_dp || 0))}">动态规划${k_dp}</span>
+              能力: 工程设计:${thinkGrade} 嵌入式开发:${codeGrade}
+              <div style="margin-top:6px">技术模块: <span class="knowledge-badges">
+                <span class="kb" title="硬件设计: ${Math.floor(Number(s.knowledge_ds || 0))}">硬件设计${k_ds}</span>
+                <span class="kb" title="传感与识别: ${Math.floor(Number(s.knowledge_graph || 0))}">传感与识别${k_graph}</span>
+                <span class="kb" title="运动规划: ${Math.floor(Number(s.knowledge_string || 0))}">运动规划${k_str}</span>
+                <span class="kb" title="系统建模: ${Math.floor(Number(s.knowledge_math || 0))}">系统建模${k_math}</span>
+                <span class="kb" title="算法优化: ${Math.floor(Number(s.knowledge_dp || 0))}">算法优化${k_dp}</span>
               </span></div>
             </div>
             ${talentsHtml ? `<div class="student-talents" style="margin-top:8px">${talentsHtml}</div>` : ''}
@@ -306,10 +306,10 @@
         const competitions = (typeof window !== 'undefined' && Array.isArray(window.competitions) && window.competitions.length > 0)
           ? window.competitions.slice().sort((a, b) => a.week - b.week)
           : [
-            { name: 'CSP-S1', week: 6 }, { name: 'CSP-S2', week: 10 }, { name: 'NOIP', week: 14 },
-            { name: '省选', week: 18 }, { name: 'NOI', week: 22 }, { name: 'CSP-S1', week: 26 },
-            { name: 'CSP-S2', week: 30 }, { name: 'NOIP', week: 34 }, { name: '省选', week: 38 },
-            { name: 'NOI', week: 42 }
+            { name: '校内选拔赛', week: 6 }, { name: '技术方案评审', week: 10 }, { name: '区域赛', week: 14 },
+            { name: '分赛区决赛', week: 18 }, { name: '全国总决赛', week: 22 }, { name: '校内选拔赛', week: 26 },
+            { name: '技术方案评审', week: 30 }, { name: '区域赛', week: 34 }, { name: '分赛区决赛', week: 38 },
+            { name: '全国总决赛', week: 42 }
           ];
 
         const lastCompWeek = competitions.length ? Math.max(...competitions.map(c => Number(c.week) || 0)) : 0;

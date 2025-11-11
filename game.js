@@ -50,6 +50,12 @@ function scaledPassCount(n){
   return Math.max(1, Math.floor(Math.sqrt(n)));
 }
 
+function knowledgeLabel(type){
+  if(typeof KNOWLEDGE_LABEL_MAP !== 'undefined' && KNOWLEDGE_LABEL_MAP[type]) return KNOWLEDGE_LABEL_MAP[type];
+  if(typeof window !== 'undefined' && window.KNOWLEDGE_LABEL_MAP && window.KNOWLEDGE_LABEL_MAP[type]) return window.KNOWLEDGE_LABEL_MAP[type];
+  return type;
+}
+
 // ===== 状态快照与差异汇总工具 =====
 function __createSnapshot(){
   return {
@@ -99,19 +105,19 @@ function __summarizeSnapshot(before, after, title, opts){
       const dC = Number((afterS.coding - beforeS.coding).toFixed(2));
       const dK = Number((afterS.knowledge - beforeS.knowledge).toFixed(2));
       if(dP !== 0) changes.push(`压力 ${dP>0?'+':''}${dP}`);
-      if(dT !== 0) changes.push(`思维 ${dT>0?'+':''}${dT}`);
-      if(dC !== 0) changes.push(`编程 ${dC>0?'+':''}${dC}`);
+      if(dT !== 0) changes.push(`工程设计 ${dT>0?'+':''}${dT}`);
+      if(dC !== 0) changes.push(`嵌入式开发 ${dC>0?'+':''}${dC}`);
       const dDS = Number(((afterS.knowledge_ds || 0) - (beforeS.knowledge_ds || 0)).toFixed(2));
       const dGraph = Number(((afterS.knowledge_graph || 0) - (beforeS.knowledge_graph || 0)).toFixed(2));
       const dStr = Number(((afterS.knowledge_string || 0) - (beforeS.knowledge_string || 0)).toFixed(2));
       const dMath = Number(((afterS.knowledge_math || 0) - (beforeS.knowledge_math || 0)).toFixed(2));
       const dDP = Number(((afterS.knowledge_dp || 0) - (beforeS.knowledge_dp || 0)).toFixed(2));
-      if(dDS !== 0) changes.push(`数据结构 ${dDS>0?'+':''}${dDS}`);
-      if(dGraph !== 0) changes.push(`图论 ${dGraph>0?'+':''}${dGraph}`);
-      if(dStr !== 0) changes.push(`字符串 ${dStr>0?'+':''}${dStr}`);
-      if(dMath !== 0) changes.push(`数学 ${dMath>0?'+':''}${dMath}`);
-      if(dDP !== 0) changes.push(`DP ${dDP>0?'+':''}${dDP}`);
-      if(dK !== 0 && !(dDS !==0 || dGraph !==0 || dStr !==0 || dMath !==0 || dDP !==0)) changes.push(`知识 ${dK>0?'+':''}${dK}`);
+      if(dDS !== 0) changes.push(`${knowledgeLabel('数据结构')} ${dDS>0?'+':''}${dDS}`);
+      if(dGraph !== 0) changes.push(`${knowledgeLabel('图论')} ${dGraph>0?'+':''}${dGraph}`);
+      if(dStr !== 0) changes.push(`${knowledgeLabel('字符串')} ${dStr>0?'+':''}${dStr}`);
+      if(dMath !== 0) changes.push(`${knowledgeLabel('数学')} ${dMath>0?'+':''}${dMath}`);
+      if(dDP !== 0) changes.push(`${knowledgeLabel('动态规划')} ${dDP>0?'+':''}${dDP}`);
+      if(dK !== 0 && !(dDS !==0 || dGraph !==0 || dStr !==0 || dMath !==0 || dDP !==0)) changes.push(`技术模块 ${dK>0?'+':''}${dK}`);
       if(changes.length) stuParts.push(`${name}: ${changes.join('，')}`);
     }
     if(stuParts.length) parts.push(stuParts.join('； '));
@@ -627,7 +633,13 @@ function outingTrainingWithSelection(difficulty_choice, province_choice, selecte
   if(__before && __after) __summarizeSnapshot(__before, __after, `外出集训：${target.name} 难度${difficulty_choice}`);
 }
 
-const KP_OPTIONS = [{id:1,name:"数据结构"},{id:2,name:"图论"},{id:3,name:"字符串"},{id:4,name:"数学"},{id:5,name:"动态规划"}];
+const KP_OPTIONS = [
+  {id:1,name:"数据结构",label:"硬件设计"},
+  {id:2,name:"图论",label:"传感与识别"},
+  {id:3,name:"字符串",label:"运动规划"},
+  {id:4,name:"数学",label:"系统建模"},
+  {id:5,name:"动态规划",label:"算法优化"}
+];
 
 function checkRandomEvents(){
   if(window.EventManager && typeof window.EventManager.checkRandomEvents === 'function'){

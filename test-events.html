@@ -86,9 +86,9 @@
         // 构造 careerCompetitions 记录：NOIP 满分触发
         if(!g.careerCompetitions) g.careerCompetitions = [];
         // remove old test records with same name to avoid duplicate
-        g.careerCompetitions = g.careerCompetitions.filter(r => !(r.entries && r.entries.some(e=>e.name === target.name && (r.name === 'NOIP' || r.name === '省选'))));
+        g.careerCompetitions = g.careerCompetitions.filter(r => !(r.entries && r.entries.some(e=>e.name === target.name && (r.name === '区域赛' || r.name === '分赛区决赛'))));
         // push a NOIP full-score record
-        g.careerCompetitions.push({ week: g.week, name: 'NOIP', passedCount: 1, totalStudents: 1, entries: [{ name: target.name, score: 400 }] });
+        g.careerCompetitions.push({ week: g.week, name: '区域赛', passedCount: 1, totalStudents: 1, entries: [{ name: target.name, score: 400 }] });
         appendOut(`已插入测试比赛记录：${target.name} 在 NOIP 得到满分 400（周 ${g.week}）`);
 
         // Ensure EventManager has been initialized with registerDefaultEvents earlier in script.js; now trigger checks
