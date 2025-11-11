@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>开始 — OI 教练模拟器</title>
+  <title>开始 — 智能车教练模拟器</title>
   <link rel="stylesheet" href="styles.css">
   <style>
     /* 启动蒙版样式 */
@@ -81,12 +81,12 @@
   <!-- 启动蒙版：加载时完全覆盖页面，点击开始后隐藏 -->
   <div id="oiStartMask" class="oi-start-mask" role="dialog" aria-label="游戏开始">
     <div class="mask-content">
-      <h2>OI 教练模拟器</h2>
+      <h2>智能车教练模拟器</h2>
       <h3 class="oi-start-subtitle" style="font-size:16px;margin:6px 0 12px;color:rgba(255,255,255,0.95);font-weight:400;line-height:1.9;"></h3>
-        高二省选，你被追忆创飞无缘省队。<br><br>
-        一觉醒来，你发现你坐在机房前，成为了你们学校信息学竞赛的总教练。<br><br>
-        回想起之前构造题没checker，模拟赛没大样例，一个月没有半天假期的训练生活。<br><br>
-        你决定要改变这一切。
+        一纸任命书把你推上校智能车实验室的指挥台。<br><br>
+        全国大学生智能汽车竞赛的新赛季刚刚发布规则，学校希望你带队冲击全国总决赛。<br><br>
+        硬件赶工、算法调参、赛道连夜打磨，所有人都在等待一个能统筹全局的教练。<br><br>
+        你决定打造一支真正的冠军之师。
   </h3>
   <p></p>
       <div class="mask-actions">
@@ -96,7 +96,7 @@
   </div>
 <div class="container">
   <header>
-    <h1>OI 教练模拟器 — 开始</h1>
+    <h1>智能车教练模拟器 — 开始</h1>
   </header>
   <div class="panel">
     <h3>新游戏设置</h3>
@@ -133,7 +133,7 @@
     </div>
 
     <label class="block" style="margin-top:10px">选择省份</label>
-    <div class="small muted" style="margin-bottom:6px">不同省份影响初始经费和训练质量。<strong>强省</strong>资源丰富<strong>弱省</strong>具有挑战性。</div>
+    <div class="small muted" style="margin-bottom:6px">不同省份影响初始经费和实验条件。<strong>强省</strong>拥有成熟实验室，<strong>弱省</strong>需要在有限资源下突破。</div>
     <div id="start-prov-grid" class="prov-grid"></div>
 
     <label class="block" style="margin-top:10px">学生人数 (3-10)</label>
@@ -144,11 +144,11 @@
     <div class="sub-panel collapsible collapsed" id="talent-only-panel" style="margin-top:12px">
       <h4>游戏核心概念</h4>
       <div class="small muted" style="line-height:1.6;margin-bottom:10px">
-        <p><strong>目标</strong>：带领学生在两个赛季内冲击NOI金牌，入选国家集训队，进军IOI</p>
-        <p><strong>学生属性</strong>：思维、编程、心理三项基础能力 + 五大知识点（数据结构、图论、字符串、数学、DP）</p>
-        <p><strong>经费管理</strong>：升级设施、参加集训都需要经费，需合理规划</p>
-        <p><strong>压力系统</strong>：高压训练会增加压力，压力过高可能导致退队</p>
-        <p><strong>比赛链</strong>：CSP-S1 → CSP-S2 → NOIP → 省选 → NOI，必须通过前一场才能参加下一场</p>
+        <p><strong>目标</strong>：在两个赛季内冲击全国总决赛金奖，赢得国家智能车集训队席位，代表学校出征国际舞台</p>
+        <p><strong>队员属性</strong>：工程设计、嵌入式开发、赛场心态三项基础能力 + 五大核心模块（硬件设计、传感与识别、运动规划、系统建模、算法优化）</p>
+        <p><strong>资源管理</strong>：升级实验室、外出测赛道都会消耗经费，合理调度资金与产线</p>
+        <p><strong>压力系统</strong>：高压冲刺会积累疲劳，压力过高可能导致队员退赛</p>
+        <p><strong>赛事链路</strong>：校内选拔赛 → 技术方案评审 → 区域赛 → 分赛区决赛 → 全国总决赛，必须通过前一场才能参加下一场</p>
       </div>
   <h4 class="collapsible-head" style="margin-top:16px">天赋预览</h4>
   <div class="small muted" style="margin-bottom:6px">学生在训练中有概率获得天赋，天赋会影响比赛表现和训练效果</div>

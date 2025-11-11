@@ -130,7 +130,7 @@
             实力: <progress value="${comp}" max="100" style="vertical-align:middle;width:70%;"></progress> ${comp}
           </div>
           <div class="compact small" style="margin-top:3px">
-            思维: ${s.thinking} | 编码: ${s.coding} | 心理: ${s.mental}
+            工程设计: ${s.thinking} | 嵌入式开发: ${s.coding} | 赛场心态: ${s.mental}
           </div>
           ${talentsHtml ? `<div class="student-talents" style="margin-top:8px">${talentsHtml}</div>` : '<div class="small muted" style="margin-top:8px">暂无天赋</div>'}
         </div>`;
@@ -223,9 +223,9 @@
       const talents = Array.from(s.talents);
       
       let info = `学生信息：${s.name}\n\n`;
-      info += `思维能力: ${s.thinking}\n`;
-      info += `编码能力: ${s.coding}\n`;
-      info += `心理素质: ${s.mental}\n`;
+      info += `工程设计: ${s.thinking}\n`;
+      info += `嵌入式开发: ${s.coding}\n`;
+      info += `赛场心态: ${s.mental}\n`;
       info += `综合实力: ${Math.floor(s.getComprehensiveAbility())}\n\n`;
       info += `拥有天赋 (${talents.length}):\n`;
       

@@ -1287,9 +1287,9 @@ function holdCompetitionModal(comp){
   for(let i=0;i<numProblems;i++){
     let tags = [];
     // CSP-S1: single problem contains all tags
-    if(comp.name === 'CSP-S1'){
+    if(comp.name === '校内选拔赛'){
       tags = knowledge_types.slice();
-    } else if(comp.name === 'NOI' && i === 0){
+    } else if(comp.name === '全国总决赛' && i === 0){
       // NOI: first problem contains all tags
       tags = knowledge_types.slice();
     } else {
@@ -1315,7 +1315,7 @@ function holdCompetitionModal(comp){
     let base_rate = WEAK_PROVINCE_BASE_PASS_RATE;
     if(game.province_type === "强省") base_rate = STRONG_PROVINCE_BASE_PASS_RATE;
     else if(game.province_type === "普通省") base_rate = NORMAL_PROVINCE_BASE_PASS_RATE;
-    if(comp.name === "省选") base_rate += PROVINCIAL_SELECTION_BONUS;
+    if(comp.name === "分赛区决赛") base_rate += PROVINCIAL_SELECTION_BONUS;
     base_pass_line = comp.maxScore * base_rate;
   }
   // pass line no longer depends on reputation
@@ -1329,7 +1329,7 @@ function holdCompetitionModal(comp){
   // Apply minimum/maximum pass line bounds per new rules:
   try{
     const compMax = (typeof comp.maxScore === 'number') ? comp.maxScore : ( (comp.numProblems||4) * 100 );
-    if(comp.name === 'NOI'){
+    if(comp.name === '全国总决赛'){
       const minLine = Math.floor(compMax * 0.8);
       if(pass_line < minLine) pass_line = minLine;
     } else {
@@ -1411,7 +1411,7 @@ function holdCompetitionModal(comp){
       // default晋级 remark if meets pass line
       if(t != null && t >= pass_line) remark = '晋级';
 
-      if(t != null && (comp.name === 'CSP-S1' || comp.name === 'CSP-S2' || comp.name === 'NOIP')){
+      if(t != null && (comp.name === '校内选拔赛' || comp.name === '技术方案评审' || comp.name === '区域赛')){
         // award hints relative to pass_line
         if(t >= pass_line){
           remark += (remark ? '；' : '') + ' 一等奖 晋级';
@@ -1420,7 +1420,7 @@ function holdCompetitionModal(comp){
         } else if(t >= pass_line * 0.4){
           remark += (remark ? '；' : '') + ' 三等奖';
         }
-      } else if(comp.name === 'NOI'){
+      } else if(comp.name === '全国总决赛'){
         // 保留原有 NOI 金/银/铜 逻辑（相对 pass_line 的 100%/70%/50%）
         if(t != null && t >= pass_line * 1.0) remark += (remark? '；' : '') + '🥇金牌';
         else if(t != null && t >= pass_line * 0.7) remark += (remark? '；' : '') + '🥈银牌';
@@ -1469,7 +1469,7 @@ function holdCompetitionModal(comp){
     }catch(e){ console.error('early season-end check failed', e); }
 
     let gold=0,silver=0,bronze=0;
-    if(comp.name==="NOI"){
+    if(comp.name==="全国总决赛"){
       // 使用与显示逻辑一致的阈值：pass_line（晋级线）及其系数
       // 这样金牌计数与金牌徽章显示保持一致
       const gold_threshold = pass_line * 1.0;
@@ -1513,7 +1513,7 @@ function holdCompetitionModal(comp){
         continue;
       }
       // participant: apply normal effects
-      if(comp.name==="NOI"){
+      if(comp.name==="全国总决赛"){
         s.pressure += 40;
         try{ if(typeof s.triggerTalents === 'function'){ s.triggerTalents('pressure_change', { source: 'competition', amount: 40, competition: comp.name }); } }catch(e){ console.error('triggerTalents pressure_change', e); }
         for(let i=0;i<results.length;i++){
@@ -1524,12 +1524,12 @@ function holdCompetitionModal(comp){
             break;
           }
         }
-      } else if(comp.name==="省选"){
+      } else if(comp.name==="分赛区决赛"){
         const delta = uniform(20,35);
         s.pressure += delta;
         try{ if(typeof s.triggerTalents === 'function'){ s.triggerTalents('pressure_change', { source: 'competition', amount: delta, competition: comp.name }); } }catch(e){ console.error('triggerTalents pressure_change', e); }
         s.mental += uniform(-5,5);
-      } else if(comp.name==="NOIP"){
+      } else if(comp.name==="区域赛"){
         const delta = uniform(15,25);
         s.pressure += delta;
         try{ if(typeof s.triggerTalents === 'function'){ s.triggerTalents('pressure_change', { source: 'competition', amount: delta, competition: comp.name }); } }catch(e){ console.error('triggerTalents pressure_change', e); }
@@ -1544,7 +1544,7 @@ function holdCompetitionModal(comp){
     try{
       if(pass_count > 0){
         // 比赛等级映射（用户要求）
-        const levelMap = { 'CSP-S1': 0.3, 'CSP-S2': 1, 'NOIP': 2 };
+        const levelMap = { '校内选拔赛': 0.3, '技术方案评审': 1, '区域赛': 2 };
         const level = levelMap[comp.name] || 1;
         // 省份强弱系数：根据 game.province_type（'强省','普通省','弱省'）决定
         let provinceCoef = 1.0;
@@ -1585,7 +1585,7 @@ function holdCompetitionModal(comp){
       }
     }catch(e){ console.error('grant error', e); }
 
-    if(comp.name==="NOI"){
+    if(comp.name==="全国总决赛"){
       if(gold>0 || silver>0){
         let reward = uniformInt(NOI_REWARD_MIN, NOI_REWARD_MAX);
         game.reputation += uniformInt(30,50);
@@ -1593,7 +1593,7 @@ function holdCompetitionModal(comp){
         game.had_good_result_recently = true;
         game.weeks_since_good_result = 0;
       }
-    } else if(comp.name==="NOIP"){
+    } else if(comp.name==="区域赛"){
       if(pass_count>0){
         // 晋级参加 NOIP
         let reward = uniformInt(NOIP_REWARD_MIN, NOIP_REWARD_MAX);
@@ -1609,11 +1609,11 @@ function holdCompetitionModal(comp){
         game.mockBlockedThisYear = true;
         game.mockBlockedReason = "CSP-S2 未晋级，无法参加 NOIP";
       }
-    } else if(comp.name==="省选"){
+    } else if(comp.name==="分赛区决赛"){
       if(pass_count>0){
         game.reputation += uniformInt(10,20);
       }
-    } else if(comp.name==="CSP-S2"){
+    } else if(comp.name==="技术方案评审"){
       // NOTE: results.length includes non-participants; use number of eligible participants
       let eligibleCount = results.filter(r=>r.eligible===true).length;
       if(pass_count >= eligibleCount * 0.7){
@@ -1625,7 +1625,7 @@ function holdCompetitionModal(comp){
         game.mockBlockedThisYear = true;
         game.mockBlockedReason = "CSP-S2 未达到要求，无法参加本年度比赛";
       }
-    } else if(comp.name==="CSP-S1"){
+    } else if(comp.name==="校内选拔赛"){
       let eligibleCount = results.filter(r=>r.eligible===true).length;
       if(pass_count >= eligibleCount * 0.8){
         let reward = uniformInt(CSP_S1_REWARD_MIN, CSP_S1_REWARD_MAX);
@@ -1658,11 +1658,11 @@ function holdCompetitionModal(comp){
             } else {
               const t = (typeof r.total === 'number') ? r.total : (r.total != null ? Number(r.total) : null);
               if(t != null && t >= pass_line) remark = '晋级';
-              if(t != null && (comp.name === 'CSP-S1' || comp.name === 'CSP-S2' || comp.name === 'NOIP')){
+              if(t != null && (comp.name === '校内选拔赛' || comp.name === '技术方案评审' || comp.name === '区域赛')){
                 if(t >= pass_line){ remark += (remark ? '；' : '') + '一等奖'; }
                 else if(t >= pass_line * 0.6){ remark += (remark ? '；' : '') + '二等奖'; }
                 else if(t >= pass_line * 0.4){ remark += (remark ? '；' : '') + '三等奖'; }
-              } else if(comp.name === 'NOI'){
+              } else if(comp.name === '全国总决赛'){
                 if(t != null && t >= pass_line * 1.0) remark += (remark? '；' : '') + '🥇金牌';
                 else if(t != null && t >= pass_line * 0.7) remark += (remark? '；' : '') + '🥈银牌';
                 else if(t != null && t >= pass_line * 0.5) remark += (remark? '；' : '') + '🥉铜牌';
@@ -1694,7 +1694,7 @@ function holdCompetitionModal(comp){
       console.log('[国家集训队检测] currWeek():', currWeek());
       
       // 第二年NOI：检查是否有金牌选手，决定是否进入国家集训队
-      if(comp.name === 'NOI' && halfIndexAfter === 1 && gold > 0){
+      if(comp.name === '全国总决赛' && halfIndexAfter === 1 && gold > 0){
         // 有金牌选手，设置标志并弹出国家集训队选择事件
         console.log('[国家集训队检测] ✅ 条件满足，显示国家集训队选择弹窗');
         // 设置标志，防止周更新时触发赛季结束
@@ -1704,7 +1704,7 @@ function holdCompetitionModal(comp){
       }
       
       // 如果没有金牌或不是第二年NOI，按原逻辑处理
-      if(comp.name === 'NOI' && halfIndexAfter === 1){
+      if(comp.name === '全国总决赛' && halfIndexAfter === 1){
         shouldTriggerEnding = true;
         endingReason = '赛季结束';
       }
@@ -1893,9 +1893,9 @@ function enterNationalTeam(goldStudents) {
   // 动态添加国家集训队比赛到 competitions 数组
   const currentWeek = game.week;
   const nationalTeamComps = [
-    {week: currentWeek + 2, name:"CTT-day1-2", difficulty:500, maxScore:600, numProblems:6, nationalTeam:true},
-    {week: currentWeek + 3, name:"CTT-day3-4", difficulty:500, maxScore:600, numProblems:6, nationalTeam:true},
-    {week: currentWeek + 4, name:"CTS", difficulty:520, maxScore:800, numProblems:8, nationalTeam:true}
+    {week: currentWeek + 2, name:"集训营-硬件冲刺", difficulty:500, maxScore:600, numProblems:6, nationalTeam:true},
+    {week: currentWeek + 3, name:"集训营-算法对抗", difficulty:500, maxScore:600, numProblems:6, nationalTeam:true},
+    {week: currentWeek + 4, name:"国家队集训考核", difficulty:520, maxScore:800, numProblems:8, nationalTeam:true}
     // IOI 会在 CTS 结束后根据晋级情况动态添加
   ];
   
@@ -2020,7 +2020,7 @@ function calculateNationalTeamQualification() {
       const currentWeek = game.week;
       const ioiComp = {
         week: currentWeek + 1,
-        name: "IOI",
+        name: "世界智能车锦标赛",
         difficulty: 550,
         maxScore: 600,
         numProblems: 6,
@@ -2029,7 +2029,7 @@ function calculateNationalTeamQualification() {
       };
       
       // 检查是否已添加IOI比赛
-      const hasIOI = window.competitions.some(c => c.name === 'IOI' && c.nationalTeam);
+      const hasIOI = window.competitions.some(c => c.name === '世界智能车锦标赛' && c.nationalTeam);
       if(!hasIOI){
         window.competitions.push(ioiComp);
         console.log('【国家集训队】动态添加IOI比赛到competitions:', ioiComp);
@@ -2054,7 +2054,7 @@ function calculateNationalTeamQualification() {
 /* 计算IOI结果 */
 function calculateIOIResults() {
   // 从 careerCompetitions 中提取IOI成绩
-  const ioiRecord = game.careerCompetitions.find(c => c.name === 'IOI');
+  const ioiRecord = game.careerCompetitions.find(c => c.name === '世界智能车锦标赛');
   if(!ioiRecord){
     console.error('未找到IOI比赛记录');
     return;
@@ -3564,16 +3564,16 @@ function renderEndSummary(){
       const competitions = (typeof window !== 'undefined' && Array.isArray(window.competitions) && window.competitions.length > 0)
         ? window.competitions.slice().sort((a, b) => a.week - b.week)
         : [
-          { name: 'CSP-S1', week: 6 },
-          { name: 'CSP-S2', week: 10 },
-          { name: 'NOIP', week: 14 },
-          { name: '省选', week: 18 },
-          { name: 'NOI', week: 22 },
-          { name: 'CSP-S1', week: 26 },
-          { name: 'CSP-S2', week: 30 },
-          { name: 'NOIP', week: 34 },
-          { name: '省选', week: 38 },
-          { name: 'NOI', week: 42 }
+          { name: '校内选拔赛', week: 6 },
+          { name: '技术方案评审', week: 10 },
+          { name: '区域赛', week: 14 },
+          { name: '分赛区决赛', week: 18 },
+          { name: '全国总决赛', week: 22 },
+          { name: '校内选拔赛', week: 26 },
+          { name: '技术方案评审', week: 30 },
+          { name: '区域赛', week: 34 },
+          { name: '分赛区决赛', week: 38 },
+          { name: '全国总决赛', week: 42 }
         ];
 
       // 计算实际最大周数：取当前周数和最后一个比赛周数中的较大值，至少为40
@@ -3712,7 +3712,7 @@ function calculateFinalEnding(gameData, endingReason) {
     let hasNoiGold = false;
     if (gameData.careerCompetitions && Array.isArray(gameData.careerCompetitions)) {
       for (let comp of gameData.careerCompetitions) {
-        if (comp.name === 'NOI' && comp.entries && Array.isArray(comp.entries)) {
+        if (comp.name === '全国总决赛' && comp.entries && Array.isArray(comp.entries)) {
           for (let entry of comp.entries) {
             if (entry.medal === 'gold') {
               hasNoiGold = true;
@@ -4188,7 +4188,7 @@ function debugzak() {
   
   // 4. 跳转到第二年NOI前（假设SEASON_WEEKS=28，第二年NOI在第14周）
   // 先找到第二年NOI的周数
-  const secondYearNOI = competitions.find(c => c.name === 'NOI' && c.week > WEEKS_PER_HALF);
+  const secondYearNOI = competitions.find(c => c.name === '全国总决赛' && c.week > WEEKS_PER_HALF);
   const targetWeek = secondYearNOI ? secondYearNOI.week - 1 : 27; // NOI前一周
   
   if(game.week < targetWeek) {

@@ -5,8 +5,8 @@ const TUTORIAL_STEPS = [
   {
     id: 'welcome',
     target: null,
-    title: '欢迎来到 OI 教练模拟器！',
-    content: '在这个游戏中，你将扮演一名信息学竞赛教练，带领学生们从零开始，冲击 NOI 金牌！让我们先熟悉一下界面。',
+    title: '欢迎来到智能车教练模拟器！',
+    content: '在这个游戏中，你将扮演一名智能车教练，带领车队从校内实验室一路闯进全国总决赛！让我们先熟悉一下界面。',
     position: 'center',
     buttons: [
       { text: '开始教程', action: 'next', primary: true },
@@ -24,16 +24,16 @@ const TUTORIAL_STEPS = [
   {
     id: 'students',
     target: '#student-list',
-    title: '学生列表',
-    content: '这是你的学生。每个学生有<strong>思维</strong>、<strong>编程</strong>、<strong>心理</strong>三项基础能力，以及五大知识点。<br>压力过高会影响表现甚至导致退队！',
+    title: '队员列表',
+    content: '这是你的车队核心成员。每位队员拥有<strong>工程设计</strong>、<strong>嵌入式开发</strong>、<strong>赛场心态</strong>三项基础能力，以及五大技术模块。<br>压力过高会影响表现甚至导致退队！',
     position: 'right',
     highlight: true
   },
   {
     id: 'talents',
     target: '.student-talents',
-    title: '学生天赋',
-    content: '<strong>天赋</strong>是学生的特殊能力，可以提供各种加成效果。<br>• <strong>获得</strong>：训练、集训后有概率获得<br>• <strong>丧失</strong>：压力过高或特殊事件可能失去<br>• <strong>效果</strong>：如提升训练效率、降低压力、减免费用等<br>鼠标悬停在天赋标签上可查看详细说明。',
+    title: '队员天赋',
+    content: '<strong>天赋</strong>是队员的特殊能力，可以提供各种加成效果。<br>• <strong>获得</strong>：训练、集训后有概率获得<br>• <strong>丧失</strong>：压力过高或特殊事件可能失去<br>• <strong>效果</strong>：如提升训练效率、降低压力、减免费用等<br>鼠标悬停在天赋标签上可查看详细说明。',
     position: 'right',
     highlight: true
   },
@@ -41,7 +41,7 @@ const TUTORIAL_STEPS = [
     id: 'comfort',
     target: '.flex-between',
     title: '舒适度系统',
-    content: '<strong>舒适度</strong>影响学生的压力恢复速度。升级宿舍、空调、食堂可以提升舒适度。',
+    content: '<strong>舒适度</strong>影响队员的压力恢复速度。升级宿舍、空调、食堂可以提升舒适度。',
     position: 'bottom',
     highlight: true
   },

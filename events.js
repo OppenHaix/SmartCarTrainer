@@ -562,7 +562,7 @@
                     const halfIndex = (c.game.week > halfBoundary) ? 1 : 0;
                     
                     if(c.game.qualification && c.game.qualification[halfIndex]){
-                      const compOrder = window.COMPETITION_ORDER || ["CSP-S1","CSP-S2","NOIP","省选","NOI"];
+                      const compOrder = window.COMPETITION_ORDER || ["校内选拔赛","技术方案评审","区域赛","分赛区决赛","全国总决赛"];
                       // 找到下一场即将进行的比赛
                       const futureComps = (window.competitions || []).filter(comp => comp.week > c.game.week);
                       if(futureComps.length > 0){
@@ -705,21 +705,21 @@
             
             const recentWindow = Math.max(1, (c.game.week || 0) - 2); // 近期两周内的比赛成绩触发概率
             // find relevant competition records in recent weeks
-            const relevant = c.game.careerCompetitions.filter(r => (r.name === 'NOIP' || r.name === '省选') && (typeof r.week === 'number' ? r.week >= recentWindow : true));
+            const relevant = c.game.careerCompetitions.filter(r => (r.name === '区域赛' || r.name === '分赛区决赛') && (typeof r.week === 'number' ? r.week >= recentWindow : true));
             if(!relevant || relevant.length === 0) return false;
 
-            // get competition definitions to determine full score for NOIP
+            // 获取赛事定义以确定区域赛满分
             const schedule = (window && window.COMPETITION_SCHEDULE) ? window.COMPETITION_SCHEDULE : null;
-            const noipDef = schedule && schedule.find(x=>x.name === 'NOIP');
+            const noipDef = schedule && schedule.find(x=>x.name === '区域赛');
             const noipFull = (noipDef && typeof noipDef.maxScore === 'number') ? Number(noipDef.maxScore) : 400;
 
             for(const rec of relevant){
               if(!rec.entries || !Array.isArray(rec.entries)) continue;
               for(const e of rec.entries){
                 if(!e || typeof e.score !== 'number') continue;
-                // NOIP 满分 或 省选 > 500
-                if(rec.name === 'NOIP' && e.score >= noipFull) return true;
-                if(rec.name === '省选' && e.score > 500) return true;
+                // 区域赛满分 或 分赛区决赛 > 500
+                if(rec.name === '区域赛' && e.score >= noipFull) return true;
+                if(rec.name === '分赛区决赛' && e.score > 500) return true;
               }
             }
           }catch(err){ console.error('poaching_offer check error', err); }
@@ -728,19 +728,19 @@
         run: c => {
           try{
             const schedule = (window && window.COMPETITION_SCHEDULE) ? window.COMPETITION_SCHEDULE : null;
-            const noipDef = schedule && schedule.find(x=>x.name === 'NOIP');
+            const noipDef = schedule && schedule.find(x=>x.name === '区域赛');
             const noipFull = (noipDef && typeof noipDef.maxScore === 'number') ? Number(noipDef.maxScore) : 400;
 
             // find the most recent matching entry and corresponding student
             const recentWindow = Math.max(1, (c.game.week || 0) - 2);
-            const records = (c.game.careerCompetitions || []).filter(r => (r.name === 'NOIP' || r.name === '省选') && (typeof r.week === 'number' ? r.week >= recentWindow : true));
+            const records = (c.game.careerCompetitions || []).filter(r => (r.name === '区域赛' || r.name === '分赛区决赛') && (typeof r.week === 'number' ? r.week >= recentWindow : true));
             let targetEntry = null; let compName = null;
             outer: for(const rec of records){
               if(!rec.entries) continue;
               for(const e of rec.entries){
                 if(!e || typeof e.score !== 'number') continue;
-                if(rec.name === 'NOIP' && e.score >= noipFull){ targetEntry = e; compName = 'NOIP'; break outer; }
-                if(rec.name === '省选' && e.score > 500){ targetEntry = e; compName = '省选'; break outer; }
+                if(rec.name === '区域赛' && e.score >= noipFull){ targetEntry = e; compName = '区域赛'; break outer; }
+                if(rec.name === '分赛区决赛' && e.score > 500){ targetEntry = e; compName = '分赛区决赛'; break outer; }
               }
             }
             if(!targetEntry) return null;
