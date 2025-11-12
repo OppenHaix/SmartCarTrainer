@@ -321,6 +321,20 @@ function trainStudentsWithTask(task, intensity) {
     const boostMultiplier = calculateBoostMultiplier(studentAbility, task.difficulty);
     
     const results = applyTaskBoosts(s, task);
+
+    let smartCarGroup = s.group;
+    try{
+      if(window.SmartCar && typeof window.SmartCar.ensureGroup === 'function'){
+        smartCarGroup = window.SmartCar.ensureGroup(s);
+      }
+    }catch(e){ smartCarGroup = s.group; }
+
+    let abilityMultipliers = { thinking: 1.0, coding: 1.0 };
+    try{
+      if(window.SmartCar && typeof window.SmartCar.getAbilityGainMultipliers === 'function'){
+        abilityMultipliers = window.SmartCar.getAbilityGainMultipliers(smartCarGroup);
+      }
+    }catch(e){ abilityMultipliers = { thinking: 1.0, coding: 1.0 }; }
     
     const libraryLevel = game.facilities.library;
     let libraryBonus = 0;
@@ -336,10 +350,18 @@ function trainStudentsWithTask(task, intensity) {
     
     // 应用知识点增加：基础效率加成 + 图书馆加成 + 强度系数 + 生病惩罚
     for(const boost of results.boosts) {
-      // 计算总的知识点增加（包含所有加成因素）
-      const totalBoost = Math.floor(boost.actualAmount * libraryMultiplier * intensityFactor * sick_penalty);
+      const attrName = (window.SmartCar && typeof window.SmartCar.mapKnowledgeToAttr === 'function')
+        ? window.SmartCar.mapKnowledgeToAttr(boost.type)
+        : null;
+      let groupMultiplier = 1.0;
+      try{
+        if(window.SmartCar && typeof window.SmartCar.getTrainingKnowledgeMultiplier === 'function'){
+          groupMultiplier = window.SmartCar.getTrainingKnowledgeMultiplier(smartCarGroup, attrName);
+        }
+      }catch(e){ groupMultiplier = 1.0; }
+      const baseBoostValue = boost.actualAmount * libraryMultiplier * intensityFactor * sick_penalty;
+      const totalBoost = Math.floor(baseBoostValue * groupMultiplier);
       s.addKnowledge(boost.type, totalBoost);
-      // 更新 actualAmount 为实际增加量，以便日志正确显示
       boost.actualAmount = totalBoost;
     }
     
@@ -354,8 +376,8 @@ function trainStudentsWithTask(task, intensity) {
     const computerMultiplier = 1.0 + computerBonus;
     
     const abilityGainBase = boostMultiplier * intensityFactor * (1 - Math.min(0.6, s.pressure/200.0));
-    const thinkingGain = uniform(0.6, 1.5) * abilityGainBase * computerMultiplier * (typeof TRAINING_EFFECT_MULTIPLIER !== 'undefined' ? TRAINING_EFFECT_MULTIPLIER : 1.0);
-    const codingGain = uniform(1, 2.5) * abilityGainBase * computerMultiplier * (typeof TRAINING_EFFECT_MULTIPLIER !== 'undefined' ? TRAINING_EFFECT_MULTIPLIER : 1.0);
+    const thinkingGain = uniform(0.6, 1.5) * abilityGainBase * computerMultiplier * abilityMultipliers.thinking * (typeof TRAINING_EFFECT_MULTIPLIER !== 'undefined' ? TRAINING_EFFECT_MULTIPLIER : 1.0);
+    const codingGain = uniform(1, 2.5) * abilityGainBase * computerMultiplier * abilityMultipliers.coding * (typeof TRAINING_EFFECT_MULTIPLIER !== 'undefined' ? TRAINING_EFFECT_MULTIPLIER : 1.0);
     
     s.thinking += thinkingGain;
     s.coding += codingGain;
@@ -1195,6 +1217,11 @@ function loadGame(){ try{
     } else if(s.talents && typeof s.talents === 'object'){
       student.talents = new Set(Object.keys(s.talents).filter(k => s.talents[k]));
     }
+    try{
+      if(window.SmartCar && typeof window.SmartCar.ensureGroup === 'function'){
+        window.SmartCar.ensureGroup(student);
+      }
+    }catch(e){ /* ignore group assignment failure */ }
     return student;
   });
   renderAll(); alert("已载入存档"); }catch(e){ alert("载入失败："+e); } }
@@ -1203,7 +1230,7 @@ function silentLoad(){ try{
   let raw = null;
   try{ raw = sessionStorage.getItem('oi_coach_save'); }catch(e){ raw = null; }
   try{ if(!raw) raw = localStorage.getItem('oi_coach_save'); }catch(e){}
-  if(!raw) return false; let o = JSON.parse(raw); game = Object.assign(new GameState(), o); window.game = game; game.facilities = Object.assign(new Facilities(), o.facilities); game.students = (o.students || []).map(s => { const student = Object.assign(new Student(), s); if(s.talents && Array.isArray(s.talents)){ student.talents = new Set(s.talents); } else if(s.talents && typeof s.talents === 'object'){ student.talents = new Set(Object.keys(s.talents).filter(k => s.talents[k])); } return student; }); return true; }catch(e){ return false; } }
+  if(!raw) return false; let o = JSON.parse(raw); game = Object.assign(new GameState(), o); window.game = game; game.facilities = Object.assign(new Facilities(), o.facilities); game.students = (o.students || []).map(s => { const student = Object.assign(new Student(), s); if(s.talents && Array.isArray(s.talents)){ student.talents = new Set(s.talents); } else if(s.talents && typeof s.talents === 'object'){ student.talents = new Set(Object.keys(s.talents).filter(k => s.talents[k])); } try{ if(window.SmartCar && typeof window.SmartCar.ensureGroup === 'function'){ window.SmartCar.ensureGroup(student); } }catch(e){} return student; }); return true; }catch(e){ return false; } }
 
 function startFromStartPage(){
   let diff = parseInt(document.getElementById('start-diff').value);
@@ -1260,6 +1287,12 @@ function initGame(difficulty, province_choice, student_count){
   for(let recruited of recruitedStudents){
     const newStud = new Student(recruited.name, recruited.thinking, recruited.coding, recruited.mental);
     
+    try{
+      if(window.SmartCar && typeof window.SmartCar.assignGroup === 'function'){
+        window.SmartCar.assignGroup(newStud, game.students.length);
+      }
+    }catch(e){ /* ignore group assignment errors */ }
+
     if(recruited.talents && recruited.talents.size > 0){
       for(let talentName of recruited.talents){
         newStud.addTalent(talentName);
@@ -1280,6 +1313,11 @@ function initGame(difficulty, province_choice, student_count){
     let coding = clamp(normal(mean, stddev), 0, 100);
     let mental = clamp(normal(mean, stddev), 0, 100);
     const newStud = new Student(name, thinking, coding, mental);
+    try{
+      if(window.SmartCar && typeof window.SmartCar.assignGroup === 'function'){
+        window.SmartCar.assignGroup(newStud, game.students.length);
+      }
+    }catch(e){ /* ignore */ }
     try{ if(window.TalentManager && typeof window.TalentManager.assignInitialTalent === 'function') window.TalentManager.assignInitialTalent(newStud); }catch(e){}
     game.students.push(newStud);
   }
