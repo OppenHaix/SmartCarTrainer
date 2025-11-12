@@ -1214,7 +1214,16 @@ function renderEndSummary(){
         const isActive = (s && s.active !== false);
         const pressureLevel = (s && typeof s.pressure === 'number') ? (s.pressure < 35 ? '低' : s.pressure < 65 ? '中' : '高') : '—';
         const pressureClass = (s && typeof s.pressure === 'number') ? (s.pressure < 35 ? 'pressure-low' : s.pressure < 65 ? 'pressure-mid' : 'pressure-high') : '';
-        
+
+        let groupDisplay = '';
+        try{
+          if(window.SmartCar && s && s.group){
+            const cfg = window.SmartCar.GROUP_CONFIG && window.SmartCar.GROUP_CONFIG[s.group];
+            groupDisplay = cfg && cfg.display ? cfg.display : s.group;
+          }
+        }catch(e){ groupDisplay = s && s.group ? s.group : ''; }
+        if(!groupDisplay){ groupDisplay = '未分组'; }
+
         let talentsHtml = '';
         try{
           if(s.talents && (s.talents instanceof Array || s.talents instanceof Set)){
@@ -1234,6 +1243,7 @@ function renderEndSummary(){
               ${!isActive ? '<span class="warn">[退队]</span>' : ''}
             </div>
             <div class="student-status">
+              <span class="label-pill" style="background-color:#edf2ff;color:#3b82f6;border-color:#bfdbfe;">${groupDisplay}</span>
               <span class="label-pill ${pressureClass}">压力: ${pressureLevel}</span>
             </div>
           </div>
