@@ -67,7 +67,8 @@ function getStudentQualificationStatus(student) {
     const requiredComp = qualChain[nextComp.name];
     if (requiredComp) {
       // 检查学生是否在qualification集合中
-      const qualSet = game.qualification[currentHalf][requiredComp];
+      const qsHalf = (game.qualification && game.qualification[currentHalf]) ? game.qualification[currentHalf] : {};
+      const qualSet = qsHalf[requiredComp];
       if (qualSet && (qualSet.has(student.name) || qualSet.has(student))) {
         result.hasQualification = true;
         result.html = `<span class="qualification-badge qualified" title="已晋级${nextComp.name}">✓ ${nextComp.name}</span>`;
@@ -609,153 +610,84 @@ function closeModal(){
 }
 
 function trainStudentsUI(){
-  const tasks = selectRandomTasks(5);
-  
-  const taskCards = tasks.map((task, idx) => {
-    const boostStr = task.boosts.map(b => `${b.type}+${b.amount}`).join(' ');
-    const diffTag = renderDifficultyTag(task.difficulty);
-    return `
-    <div class="prov-card option-card task-card" data-idx="${idx}" style="min-width:200px;padding:12px;border-radius:6px;cursor:pointer;border:2px solid #ddd;">
-      <div class="card-title" style="font-weight:600;margin-bottom:4px">${task.name}</div>
-      <div class="small" style="margin:4px 0">难度: ${diffTag}</div>
-      <div class="card-desc small muted">${boostStr}</div>
-    </div>
-  `;
-  }).join('');
-
-  const intensityHtml = `
-    <div style="margin-top:8px;padding:0 4px;text-align:center;">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;max-width:220px;margin-left:auto;margin-right:auto;">
-        <span class="small" style="color:#666;">轻度</span>
-        <span id="intensity-value" style="font-weight:700;font-size:16px;color:var(--accent);">中度</span>
-        <span class="small" style="color:#666;">重度</span>
+  try{
+    const groups = (window.SmartCar && SmartCar.GROUPS) ? SmartCar.GROUPS : [];
+    const elemsMap = new Map();
+    for(const g of groups){
+      const track = SmartCar.GROUP_CONFIG[g]?.track || [];
+      for(const el of track){ if(!elemsMap.has(el.id)) elemsMap.set(el.id, { id: el.id, name: el.name, type: el.type, difficulty: el.difficulty }); }
+    }
+    const elems = Array.from(elemsMap.values());
+    const cards = elems.map((el, idx) => {
+      const diffTag = renderDifficultyTag(el.difficulty);
+      return `
+        <div class="prov-card option-card sc-element-card" data-elid="${el.id}" style="min-width:200px;padding:12px;border-radius:6px;cursor:pointer;border:2px solid #ddd;">
+          <div class="card-title" style="font-weight:600;margin-bottom:4px">${el.name}</div>
+          <div class="small" style="margin:4px 0">难度: ${diffTag}</div>
+          <div class="card-desc small muted">${el.type || ''}</div>
+        </div>`;
+    }).join('');
+    const intensityHtml = `
+      <div style="margin-top:8px;padding:0 4px;text-align:center;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;max-width:220px;margin-left:auto;margin-right:auto;">
+          <span class="small" style="color:#666;">轻度</span>
+          <span id="intensity-value" style="font-weight:700;font-size:16px;color:var(--accent);">中度</span>
+          <span class="small" style="color:#666;">重度</span>
+        </div>
+        <input type="range" id="intensity-slider" min="1" max="3" value="2" step="1" style="width:220px;display:block;margin:0 auto;height:8px;border-radius:4px;outline:none;-webkit-appearance:none;appearance:none;background:linear-gradient(to right, #48bb78 0%, #ecc94b 50%, #f56565 100%);">
       </div>
-      <input type="range" id="intensity-slider" min="1" max="3" value="2" step="1"
-        style="width:220px;display:block;margin:0 auto;height:8px;border-radius:4px;outline:none;-webkit-appearance:none;appearance:none;background:linear-gradient(to right, #48bb78 0%, #ecc94b 50%, #f56565 100%);">
-    </div>
-    <div id="intensity-warning" style="margin-top:12px;font-weight:700;text-align:center;display:none;"></div>
-    <div class="small muted" style="margin-top:6px;text-align:center;">强度影响压力和训练效果</div>
-  `;
-
-  showModal(`<h3>选择训练题目</h3>
-    <div class="small muted" style="margin-bottom:10px">从下方5道题目中选择一道进行训练。题目提升效果受学生能力与难度匹配度影响。</div>
-    <label class="block">可选题目</label>
-    <div id="train-task-grid" style="display:flex;gap:12px;flex-wrap:wrap;margin-top:8px;overflow-x:auto;max-height:300px;overflow-y:auto;">${taskCards}</div>
-    <div id="train-task-helper" class="small muted" style="margin-top:6px;display:none;color:#c53030;font-weight:700"></div>
-    <label class="block" style="margin-top:14px">训练强度</label>
-    ${intensityHtml}
-    <div class="modal-actions" style="margin-top:16px">
-      <button class="btn btn-ghost" onclick="closeModal()">取消</button>
-      <button class="btn" id="train-confirm">开始训练（1周）</button>
-    </div>`);
-
-  // 题目选择逻辑
-  const tCards = Array.from(document.querySelectorAll('#train-task-grid .task-card'));
-  if(tCards.length > 0) tCards[0].classList.add('selected');
-  tCards.forEach(c => {
-    c.onclick = () => {
-      tCards.forEach(x => { x.classList.remove('selected'); x.classList.remove('shake'); });
-      c.classList.add('selected');
-      const helper = $('train-task-helper'); if(helper){ helper.style.display='none'; helper.innerText=''; }
-      const grid = $('train-task-grid'); if(grid) grid.classList.remove('highlight-required');
-      updateIntensityWarning();
+      <div id="intensity-warning" style="margin-top:12px;font-weight:700;text-align:center;display:none;"></div>
+      <div class="small muted" style="margin-top:6px;text-align:center;">专项训练提升车辆对元素的响应与通过率</div>`;
+    showModal(`<h3>赛道专项训练</h3>
+      <div class="small muted" style="margin-bottom:10px">选择一个赛道元素进行全队专项训练。不同分组学生将按该元素对应的分组参数获得提升。</div>
+      <label class="block">可选元素</label>
+      <div id="sc-element-grid" style="display:flex;gap:12px;flex-wrap:wrap;margin-top:8px;overflow-x:auto;max-height:300px;overflow-y:auto;">${cards}</div>
+      <div id="train-task-helper" class="small muted" style="margin-top:6px;display:none;color:#c53030;font-weight:700"></div>
+      <label class="block" style="margin-top:14px">训练强度</label>
+      ${intensityHtml}
+      <div class="modal-actions" style="margin-top:16px">
+        <button class="btn btn-ghost" onclick="closeModal()">取消</button>
+        <button class="btn" id="train-confirm">开始训练（1周）</button>
+      </div>`);
+    const cardsEls = Array.from(document.querySelectorAll('#sc-element-grid .sc-element-card'));
+    if(cardsEls.length > 0) cardsEls[0].classList.add('selected');
+    cardsEls.forEach(c => { c.onclick = () => { cardsEls.forEach(x => { x.classList.remove('selected'); x.classList.remove('shake'); }); c.classList.add('selected'); updateIntensityWarning(); }; });
+    const slider = document.getElementById('intensity-slider');
+    const valueDisplay = document.getElementById('intensity-value');
+    function updateIntensityWarning(){
+      const intensity = parseInt(slider.value);
+      const names = ['', '轻度', '中度', '重度'];
+      valueDisplay.textContent = names[intensity];
+      const sel = document.querySelector('#sc-element-grid .sc-element-card.selected');
+      if(!sel) return;
+      const elid = sel.dataset.elid;
+      const anyEl = elems.find(e => e.id === elid);
+      const proxyTask = { name: anyEl ? anyEl.name : '专项训练', difficulty: anyEl ? anyEl.difficulty : 60, boosts: [] };
+      const res = calculateTrainingPressure(proxyTask, intensity);
+      const w = document.getElementById('intensity-warning');
+      w.style.display = 'block';
+      if(res.hasQuitRisk){ w.style.color = '#c53030'; w.innerText = '压力过大'; }
+      else if(res.hasHighPressure){ w.style.color = '#d97706'; w.innerText = '压力略大'; }
+      else { w.style.color = '#2f855a'; w.innerText = '压力尚可'; }
+    }
+    slider.addEventListener('input', updateIntensityWarning);
+    updateIntensityWarning();
+    $('train-confirm').onclick = () => {
+      const sel = document.querySelector('#sc-element-grid .sc-element-card.selected');
+      if(!sel){ const helper = $('train-task-helper'); if(helper){ helper.style.display='block'; helper.innerText='请选择一个赛道元素'; } const first = document.querySelector('#sc-element-grid .sc-element-card'); if(first){ first.classList.add('shake'); setTimeout(()=>first.classList.remove('shake'), 900); } return; }
+      const elid = sel.dataset.elid;
+      let chosen = null;
+      for(const g of groups){ const track = SmartCar.GROUP_CONFIG[g]?.track || []; const hit = track.find(e => e.id === elid); if(hit){ chosen = hit; break; } }
+      const intensity = parseInt(slider.value);
+      closeModal();
+      trainStudentsForElement(chosen || { id: elid, name: '专项训练', difficulty: 60, abilityWeights: {} }, intensity);
+      let nextComp = competitions.find(c => c.week > currWeek());
+      let weeksToComp = nextComp ? (nextComp.week - currWeek()) : Infinity;
+      let advance = Math.min(1, weeksToComp);
+      safeWeeklyUpdate(advance);
+      renderAll();
     };
-  });
-
-  // 滑块控制逻辑
-  const slider = document.getElementById('intensity-slider');
-  const valueDisplay = document.getElementById('intensity-value');
-  
-  // 自定义滑块样式（适配不同浏览器）
-  const style = document.createElement('style');
-  style.textContent = `
-    #intensity-slider::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      appearance: none;
-      width: 20px;
-      height: 20px;
-      border-radius: 50%;
-      background: white;
-      cursor: pointer;
-      border: 2px solid var(--accent);
-      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-    }
-    #intensity-slider::-moz-range-thumb {
-      width: 20px;
-      height: 20px;
-      border-radius: 50%;
-      background: white;
-      cursor: pointer;
-      border: 2px solid var(--accent);
-      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-    }
-    #intensity-slider::-webkit-slider-track {
-      height: 8px;
-      border-radius: 4px;
-    }
-    #intensity-slider::-moz-range-track {
-      height: 8px;
-      border-radius: 4px;
-    }
-  `;
-  document.head.appendChild(style);
-
-  function updateIntensityWarning() {
-    const intensity = parseInt(slider.value);
-    const intensityNames = ['', '轻度', '中度', '重度'];
-    valueDisplay.textContent = intensityNames[intensity];
-    
-    const taskBtn = document.querySelector('#train-task-grid .task-card.selected');
-    if(!taskBtn) return;
-    
-    const taskIdx = parseInt(taskBtn.dataset.idx);
-    const selectedTask = tasks[taskIdx];
-    
-    // 预计算压力变化
-    const warningDiv = document.getElementById('intensity-warning');
-    const result = calculateTrainingPressure(selectedTask, intensity);
-    warningDiv.style.display = 'block';
-    // 仅使用彩色文本展示简单状态（不显示背景或额外描述）
-    if(result.hasQuitRisk) {
-      warningDiv.style.color = '#c53030';
-      warningDiv.innerText = '压力过大';
-    } else if(result.hasHighPressure) {
-      warningDiv.style.color = '#d97706';
-      warningDiv.innerText = '压力略大';
-    } else {
-      warningDiv.style.color = '#2f855a';
-      warningDiv.innerText = '压力尚可';
-    }
-  }
-
-  slider.addEventListener('input', updateIntensityWarning);
-  updateIntensityWarning();
-
-  $('train-confirm').onclick = () => {
-    let taskBtn = document.querySelector('#train-task-grid .task-card.selected');
-
-    if(!taskBtn) {
-      const helper = $('train-task-helper'); if(helper){ helper.style.display='block'; helper.innerText='请先选择一道训练题目以开始训练'; }
-      const grid = $('train-task-grid'); if(grid) grid.classList.add('highlight-required');
-      const first = document.querySelector('#train-task-grid .task-card');
-      if(first){ first.classList.add('shake'); setTimeout(()=>first.classList.remove('shake'), 900); try{ first.scrollIntoView({ behavior: 'smooth', block: 'center' }); }catch(e){} }
-      return;
-    }
-
-    let taskIdx = parseInt(taskBtn.dataset.idx);
-    let selectedTask = tasks[taskIdx];
-    let intensity = parseInt(slider.value);
-    
-    closeModal();
-    
-    trainStudentsWithTask(selectedTask, intensity);
-    
-    let nextComp = competitions.find(c => c.week > currWeek());
-    let weeksToComp = nextComp ? (nextComp.week - currWeek()) : Infinity;
-    let advance = Math.min(1, weeksToComp);
-    safeWeeklyUpdate(advance);
-    renderAll();
-  };
+  }catch(e){ console.error('trainStudentsUI smartcar error', e); }
 }
 
 function holdMockContestUI(){
@@ -1719,12 +1651,12 @@ function calculateFinalEnding(gameData, endingReason) {
 
 function mapEndingToDescription(endingTitle){
   const map = {
-    '💸 经费耗尽结局': '项目经费枯竭，无法继续运作。研究与招生被迫停摆，学校的信息学团队被迫解散，曾经的努力戛然而止。',
+    '💸 经费耗尽结局': '项目经费枯竭，无法继续运作。研究与招生被迫停摆，学校的智能车团队被迫解散，曾经的努力戛然而止。',
     '🌟 荣耀结局': '车队取得辉煌胜利，拿下全国总决赛金奖或进入国家智能车集训队，你也因此成为王牌教练，学校声誉大增，合作资源接踵而至。',
     '🌟 顶尖结局': '队员在世界智能车锦标赛上斩获奖牌，为国争光！这是智能车竞赛的最高荣誉，你培养出了世界级选手，成为传奇教练。',
     '👑 AKIOI': '不可思议！队员在世界智能车锦标赛上取得满分，这是工程实力的巅峰表现！你的名字将永远铭刻在智能车竞赛的历史上，成为最伟大的教练之一。',
     '😵 崩溃结局': '管理失误，团队陷入混乱，学生因为高压管理训练接连AFO，与赛事缺乏支撑，最终不得不终止项目。',
-    '💼 普通结局': '项目平稳结束，虽无惊艳成就但积累了经验，信息学团队平稳地继续发展。',
+    '💼 普通结局': '项目平稳结束，虽无惊艳成就但积累了经验，智能车团队平稳地继续发展。',
     '❓ 未知结局': '结局信息不完整或读取异常，无法判定具体结果。请检查存档或重放以获得正确结算。'
   };
   return map[endingTitle] || '这是一个结局的简短描述，概述项目在赛季结束时的主要走向与影响。';

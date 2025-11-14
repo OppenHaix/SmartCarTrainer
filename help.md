@@ -45,4 +45,5 @@
 
 ---
 
-作者 @Dreamers-seve · 洛谷: https://www.luogu.com.cn/user/668972 · GitHub: https://github.com/Dreamersseve/OItrainer
+原项目作者 @Dreamers-seve · 再版作者 @OppenHaix<br>
+GitHub: <a href="https://github.com/OppenHaix/SmartCarTrainer" target="_blank" rel="noopener">SmartCarTrainer</a>

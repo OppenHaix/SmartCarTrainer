@@ -456,6 +456,72 @@ function trainStudentsWithTask(task, intensity) {
   try{ checkRandomEvents(); }catch(e){ console.error('post-training checkRandomEvents failed', e); }
 }
 
+function trainStudentsForElement(element, intensity){
+  log(`开始赛道专项训练：${element.name}（难度${element.difficulty}，强度${intensity===1?'轻':intensity===2?'中':'重'}）`);
+  const __before = typeof __createSnapshot === 'function' ? __createSnapshot() : null;
+  let weather_factor = game.getWeatherFactor();
+  let comfort = game.getComfort();
+  let comfort_factor = 1.0 + Math.max(0.0, (50 - comfort) / 100.0);
+  const attrLabels = { hardwareDesign:'硬件设计', sensorRecognition:'传感与识别', motionPlanning:'运动规划', systemModeling:'系统建模', algorithmOptimization:'算法优化' };
+  const intensityFactor = intensity === 1 ? 0.7 : intensity === 3 ? 1.3 : 1.0;
+  const trainingBase = (typeof TRAINING_BASE_KNOWLEDGE_GAIN_PER_INTENSITY !== 'undefined' ? TRAINING_BASE_KNOWLEDGE_GAIN_PER_INTENSITY : 15);
+  const trainingResults = [];
+  for(let s of game.students){
+    if(!s || s.active === false) continue;
+    let personalComfort = comfort;
+    if(s.talents && s.talents.has('天气敏感')){ const baseComfort = game.base_comfort; const weatherEffect = comfort - baseComfort; personalComfort = baseComfort + weatherEffect * 2; personalComfort = Math.max(0, Math.min(100, personalComfort)); }
+    if(s.talents && s.talents.has('美食家')){ const canteenBonus = 3 * (game.facilities.canteen - 1); personalComfort += canteenBonus; personalComfort = Math.max(0, Math.min(100, personalComfort)); }
+    s.comfort = personalComfort;
+    let sick_penalty = (s.sick_weeks > 0) ? 0.7 : 1.0;
+    let smartCarGroup = s.group;
+    try{ if(window.SmartCar && typeof window.SmartCar.ensureGroup === 'function'){ smartCarGroup = window.SmartCar.ensureGroup(s); } }catch(e){ smartCarGroup = s.group; }
+    let abilityMultipliers = { thinking: 1.0, coding: 1.0 };
+    try{ if(window.SmartCar && typeof window.SmartCar.getAbilityGainMultipliers === 'function'){ abilityMultipliers = window.SmartCar.getAbilityGainMultipliers(smartCarGroup); } }catch(e){ abilityMultipliers = { thinking: 1.0, coding: 1.0 }; }
+    const libraryLevel = game.facilities.library;
+    let libraryBonus = 0; if(libraryLevel === 1) libraryBonus = -0.20; else if(libraryLevel === 2) libraryBonus = -0.05; else if(libraryLevel === 3) libraryBonus = 0.10; else if(libraryLevel === 4) libraryBonus = 0.12; else if(libraryLevel === 5) libraryBonus = 0.14;
+    const libraryMultiplier = 1.0 + libraryBonus;
+    const studentAbility = (s.thinking + s.coding) / 2.0;
+    const boostMultiplier = calculateBoostMultiplier(studentAbility, element.difficulty);
+    const computerLevel = game.facilities.computer;
+    let computerBonus = 0; if(computerLevel === 1) computerBonus = -0.2; else if(computerLevel === 2) computerBonus = 0; else if(computerLevel === 3) computerBonus = 0.1; else if(computerLevel === 4) computerBonus = 0.2; else if(computerLevel === 5) computerBonus = 0.3;
+    const computerMultiplier = 1.0 + computerBonus;
+    const weights = element.abilityWeights || {};
+    const weightSum = Object.values(weights).reduce((a,b)=>a+Number(b||0),0) || 1;
+    const boosts = [];
+    for(const [attr,w] of Object.entries(weights)){
+      const groupMult = (window.SmartCar && typeof window.SmartCar.getTrainingKnowledgeMultiplier === 'function') ? window.SmartCar.getTrainingKnowledgeMultiplier(smartCarGroup, attr) : 1.0;
+      const base = trainingBase * intensityFactor * libraryMultiplier * sick_penalty * boostMultiplier;
+      const total = Math.floor(base * (Number(w||0)/weightSum) * groupMult * (typeof TRAINING_EFFECT_MULTIPLIER !== 'undefined' ? TRAINING_EFFECT_MULTIPLIER : 1.0));
+      const typeLabel = attrLabels[attr] || attr;
+      s.addKnowledge(typeLabel, total);
+      boosts.push({ type: typeLabel, actualAmount: total });
+    }
+    const abilityGainBase = boostMultiplier * intensityFactor * (1 - Math.min(0.6, s.pressure/200.0));
+    const thinkingGain = uniform(0.6, 1.5) * abilityGainBase * computerMultiplier * abilityMultipliers.thinking * (typeof TRAINING_EFFECT_MULTIPLIER !== 'undefined' ? TRAINING_EFFECT_MULTIPLIER : 1.0);
+    const codingGain = uniform(1, 2.5) * abilityGainBase * computerMultiplier * abilityMultipliers.coding * (typeof TRAINING_EFFECT_MULTIPLIER !== 'undefined' ? TRAINING_EFFECT_MULTIPLIER : 1.0);
+    s.thinking += thinkingGain;
+    s.coding += codingGain;
+    s.thinking = (s.thinking || 0);
+    s.coding = (s.coding || 0);
+    let base_pressure = (intensity===1) ? 15 : (intensity===2) ? 25 : 40;
+    const difficultyPressure = Math.max(0, (element.difficulty - studentAbility) * 0.2);
+    base_pressure += difficultyPressure;
+    if(intensity===3) base_pressure *= TRAINING_PRESSURE_MULTIPLIER_HEAVY; else if(intensity===2) base_pressure *= TRAINING_PRESSURE_MULTIPLIER_MEDIUM;
+    let canteen_reduction = game.facilities.getCanteenPressureReduction();
+    let pressure_increase = base_pressure * weather_factor * canteen_reduction * comfort_factor; if(s.sick_weeks > 0) pressure_increase += 10; pressure_increase *= (typeof PRESSURE_INCREASE_MULTIPLIER !== 'undefined' ? PRESSURE_INCREASE_MULTIPLIER : 1.0);
+    let finalPressureIncrease = pressure_increase;
+    try{ if(typeof s.triggerTalents === 'function'){ const talentResults = s.triggerTalents('pressure_change', { source: 'element_training', amount: pressure_increase, element }); for(const r of (talentResults||[])){ const out = r && r.result ? r.result : r; if(typeof out === 'object'){ const act = out.action; if(act === 'moyu_cancel_pressure'){ finalPressureIncrease = 0; } else if(act === 'halve_pressure'){ finalPressureIncrease = finalPressureIncrease * 0.5; } else if(act === 'double_pressure'){ finalPressureIncrease = finalPressureIncrease * 2.0; } } } } }catch(e){ }
+    s.pressure += finalPressureIncrease;
+    trainingResults.push({ name: s.name, multiplier: boostMultiplier, boosts });
+  }
+  game.weeks_since_entertainment += 1;
+  for(const result of trainingResults){ const boostStrs = result.boosts.map(b => `${b.type}+${b.actualAmount}`).join(', '); const effPercent = Math.round(result.multiplier * 100); log(`  ${result.name}: 效率${effPercent}% [${boostStrs}]`); }
+  const __after = typeof __createSnapshot === 'function' ? __createSnapshot() : null;
+  if(__before && __after) __summarizeSnapshot(__before, __after, `赛道专项训练：${element.name}`);
+  try{ game.lastTrainingFinishedWeek = game.week; }catch(e){}
+  try{ checkRandomEvents(); }catch(e){ }
+}
+
 function simulateHiddenMockScore(s, diffIdx){
   const knowledge_types = ["数据结构","图论","字符串","数学","动态规划"];
   let total = 0;
